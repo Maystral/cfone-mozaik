@@ -38,7 +38,7 @@ export interface Risk {
 }
 export interface Claim { id: string; owner: string; riskId: string; priority: 1 | 2 | 3; fromAccount: string; to: string; amountFactId: string; requestedMinor: Minor; byDate: string; seq: number }
 export interface Grant { claimId: string; grantedMinor: Minor; availableMinor: Minor; windowEnds: string; status: "granted" | "partial" | "refused"; reason?: string }
-export interface Action { id: string; riskId: string; owner: string; claimIds: string[]; title: string; body: string; status: "proposed" | "superseded" | "approved" | "snoozed" }
+export interface Action { id: string; riskId: string; owner: string; claimIds: string[]; title: string; body: string; status: "proposed" | "superseded" | "approved" | "snoozed"; sig?: string }
 export interface Span { agentId: string; loopId: string; start: number; end?: number }
 export interface Metrics {
 	participants: number; loops: number; peakLoops: number; peakInFlight: number; overlapMs: number

@@ -1,7 +1,7 @@
 // Watches every event: loop spans, metrics, settled detection, an optional event log.
 import { appendFileSync, mkdirSync } from "node:fs"
 import { createHuman, SituationSpecification, type Human, type SemanticEvent } from "@mozaik-ai/core"
-import type { Ctx } from "./kit.ts"
+import { intakeDone, type Ctx } from "./kit.ts"
 import { emit } from "../events.ts"
 
 class Always extends SituationSpecification { isSatisfiedBy(): boolean { return true } }
@@ -33,11 +33,7 @@ export function createObserver(ctx: Ctx, sink?: (e: SemanticEvent) => void): Hum
 	if (record) { mkdirSync("out", { recursive: true }); appendFileSync("out/events.jsonl", "") }
 
 	const openSpans = () => state.spans.filter((s) => s.end === undefined).length
-	const terminal = () => {
-		const docs = [...state.documents.values()]
-		if (docs.length === 0) return false
-		return docs.every((d) => d.kind === "statement" ? d.status === "verified" || d.status === "quarantined" : ["processed", "unsupported", "quarantined"].includes(d.status))
-	}
+	const terminal = () => intakeDone(state)
 	const check = () => {
 		if (settled) return
 		const v = state.forecast?.version ?? 0

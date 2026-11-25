@@ -57,3 +57,10 @@ export function safely(ctx: Ctx, who: string, f: () => void | Promise<void>): vo
 		ctx.state.log.push(`${who}: ${(e as Error).message}`)
 	}
 }
+
+/** Every document is through intake: statements verified or quarantined, other documents processed or unsupported. */
+export function intakeDone(state: HouseholdState): boolean {
+	const docs = [...state.documents.values()]
+	if (docs.length === 0) return false
+	return docs.every((d) => d.kind === "statement" ? d.status === "verified" || d.status === "quarantined" : ["processed", "unsupported", "quarantined"].includes(d.status))
+}

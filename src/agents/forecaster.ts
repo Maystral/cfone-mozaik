@@ -1,18 +1,33 @@
 // Projects every current account for 90 days and publishes the position, risks and cover as sourced facts.
 import type { Agent } from "@mozaik-ai/core"
-import { codeParticipant, safely, type Ctx } from "./kit.ts"
+import { codeParticipant, intakeDone, safely, type Ctx } from "./kit.ts"
 import { emit, On } from "../events.ts"
-import { buildForecast, latestRate, type Forecast, type Rate } from "../domain/forecast.ts"
+import { buildForecast, latestRate, type Forecast, type ForecastInput, type Rate } from "../domain/forecast.ts"
 import { latestStatements } from "../domain/recurring.ts"
 import { convert } from "../money.ts"
 import { addDays, humanDate } from "../dates.ts"
 import type { SourceRef } from "../types.ts"
 
 export const DEBOUNCE_MS = 150
-const TRIGGERS = ["statement.verified", "commitment.added", "terms.added", "rates.added", "reservation.changed", "action.approved", "transfer.matched"]
+const TRIGGERS = ["statement.verified", "statement.quarantined", "commitment.added", "terms.added", "rates.added", "reservation.changed", "action.approved", "action.snoozed", "transfer.matched"]
 
 export function ratesFromFacts(ctx: Ctx): Rate[] {
 	return ctx.state.facts.list("fx:").map((f) => { const [, base, quote, date] = f.id.split(":"); return { base: base!, quote: quote!, date: date!, rate: String(f.value), factId: f.id } })
+}
+
+/** What the forecast and the Treasurer read from shared state (claims and grants left to the caller). */
+export function forecastBase(ctx: Ctx): Omit<ForecastInput, "claims" | "grants"> {
+	const { state, config } = ctx
+	const matched = new Set<string>([...state.transfers.values()].flatMap((t) => { const p = t as { out?: string; in?: string }; return [p.out ?? "", p.in ?? ""] }))
+	return {
+		asOf: config.asOf, horizonDays: config.horizonDays, homeCurrency: config.homeCurrency, buffers: config.buffers, rates: ratesFromFacts(ctx),
+		statements: [...state.statements.values()], accounts: [...state.accounts.values()], commitments: [...state.commitments.values()],
+		cardTerms: [...state.cardTerms.values()], matchedRowIds: matched,
+	}
+}
+
+export function approvedClaimIds(ctx: Ctx): Set<string> {
+	return new Set([...ctx.state.actions.values()].filter((a) => a.status === "approved").flatMap((a) => a.claimIds))
 }
 
 const key = (s: SourceRef) => ("docId" in s ? `${s.docId}:${s.page}:${s.line}` : `f:${s.factId}`)
@@ -25,15 +40,9 @@ export function createForecaster(ctx: Ctx): Agent {
 	let lastSignature = ""
 
 	const publish = () => {
-		const accounts = [...state.accounts.values()]
-		const statements = [...state.statements.values()]
-		const rates = ratesFromFacts(ctx)
-		const matched = new Set<string>([...state.transfers.values()].flatMap((t) => { const p = t as { out?: string; in?: string }; return [p.out ?? "", p.in ?? ""] }))
-		const f: Forecast = buildForecast({
-			asOf: config.asOf, horizonDays: config.horizonDays, homeCurrency: config.homeCurrency, buffers: config.buffers, rates,
-			statements, accounts, commitments: [...state.commitments.values()], cardTerms: [...state.cardTerms.values()],
-			claims: [...state.claims.values()], grants: [...state.grants.values()], matchedRowIds: matched,
-		}, version + 1)
+		const base = forecastBase(ctx)
+		const { accounts, statements, rates } = base
+		const f: Forecast = buildForecast({ ...base, claims: [...state.claims.values()], grants: [...state.grants.values()], approvedClaimIds: approvedClaimIds(ctx) }, version + 1)
 		const producer = self.getId()
 		const home = config.homeCurrency
 		// Position in the home currency; a balance without a rate is left out, never converted at 1:1.
@@ -112,12 +121,13 @@ export function createForecaster(ctx: Ctx): Agent {
 			state.facts.put({ id: `cover:${c.riskId}:${c.accountId}`, label: `${name} can cover the rest of ${c.riskId} at the sourced rate`, kind: "money", value: c.needMinor, currency: c.currency, sources: [{ factId: `shortfall:${c.riskId}` }, { factId: c.rateFactId }], derivedFrom: [`shortfall:${c.riskId}`, c.rateFactId], producer })
 			state.facts.put({ id: `free:${c.riskId}:${c.accountId}`, label: `${name} free after its buffer`, kind: "money", value: c.freeMinor, currency: c.currency, sources: [f.openings[c.accountId]!.source], producer })
 		}
-		const signature = f.fingerprint + JSON.stringify(f.planned) + JSON.stringify(f.cover)
+		const ready = intakeDone(state)
+		const signature = `${ready}|${f.fingerprint}|${JSON.stringify(f.flows)}|${JSON.stringify(f.cover)}`
 		if (signature === lastSignature && state.forecast) return
 		lastSignature = signature
 		version = f.version
 		state.forecast = f
-		emit(ctx.rt, "forecast.updated", producer, { version: f.version, riskFingerprint: f.fingerprint })
+		emit(ctx.rt, "forecast.updated", producer, { version: f.version, riskFingerprint: f.fingerprint, ready })
 	}
 
 	const trigger = () => {
@@ -129,6 +139,11 @@ export function createForecaster(ctx: Ctx): Agent {
 		}, DEBOUNCE_MS)
 	}
 
-	const self: Agent = codeParticipant("Forecaster", TRIGGERS.map((t) => ({ specification: new On(t), processor: { apply: () => trigger() } })))
+	const handlers = TRIGGERS.map((t) => ({ specification: new On(t), processor: { apply: () => trigger() } }))
+	// Until intake is complete, a finished loop (e.g. the Clerk's last document) may be what completes it.
+	handlers.push({ specification: new On("model.answer"), processor: { apply: () => { if (!ready()) trigger() } } })
+	let wasReady = false
+	const ready = () => { if (!wasReady) wasReady = intakeDone(state); return wasReady }
+	const self: Agent = codeParticipant("Forecaster", handlers)
 	return self
 }

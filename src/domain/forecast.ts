@@ -4,12 +4,13 @@ import { addDays, dayIn, dayOf } from "../dates.ts"
 import { neededIn } from "../money.ts"
 import { detectRecurring, latestStatements, type Recurring } from "./recurring.ts"
 
-export interface Flow { date: string; amountMinor: Minor; kind: "recurring" | "cheque" | "autopay" | "planned"; label: string; ref?: string; estimated?: boolean; sources: SourceRef[] }
+export interface Flow { date: string; amountMinor: Minor; kind: "recurring" | "cheque" | "autopay" | "planned"; label: string; ref?: string; estimated?: boolean; approved?: boolean; sources: SourceRef[] }
 export interface Rate { base: string; quote: string; date: string; rate: string; factId: string }
 export interface ForecastInput {
 	asOf: string; horizonDays: number; homeCurrency: string; buffers: Record<string, Minor>; rates: Rate[]
 	statements: Statement[]; accounts: Account[]; commitments: Commitment[]; cardTerms: CardTerms[]; claims: Claim[]; grants: Grant[]
 	matchedRowIds?: Set<string>
+	approvedClaimIds?: Set<string>
 }
 export interface Cover { riskId: string; accountId: string; currency: string; needMinor: Minor; freeMinor: Minor; rateFactId: string }
 export interface Forecast {
@@ -113,21 +114,22 @@ export function baseFlows(input: Omit<ForecastInput, "claims" | "grants">): Base
 	return { start, end, current, openings, recurring, baseFlows: flows }
 }
 
-export function plannedFlows(base: Record<string, Flow[]>, claims: Claim[], grants: Grant[]): Record<string, Flow[]> {
+export function plannedFlows(base: Record<string, Flow[]>, claims: Claim[], grants: Grant[], approved?: Set<string>): Record<string, Flow[]> {
 	const out: Record<string, Flow[]> = Object.fromEntries(Object.entries(base).map(([k, v]) => [k, [...v]]))
 	for (const g of grants) {
 		const c = claims.find((x) => x.id === g.claimId)
 		if (!c || g.grantedMinor <= 0) continue
 		const sources: SourceRef[] = [{ factId: `grant:${c.id}` }]
-		out[c.fromAccount]?.push({ date: c.byDate, amountMinor: -g.grantedMinor, kind: "planned", label: c.id, ref: c.id, sources })
-		out[c.to]?.push({ date: c.byDate, amountMinor: g.grantedMinor, kind: "planned", label: c.id, ref: c.id, sources })
+		const ok = approved?.has(c.id) ? { approved: true } : {}
+		out[c.fromAccount]?.push({ date: c.byDate, amountMinor: -g.grantedMinor, kind: "planned", label: c.id, ref: c.id, ...ok, sources })
+		out[c.to]?.push({ date: c.byDate, amountMinor: g.grantedMinor, kind: "planned", label: c.id, ref: c.id, ...ok, sources })
 	}
 	return out
 }
 
 export function buildForecast(input: ForecastInput, version: number): Forecast {
 	const b = baseFlows(input)
-	const planned = plannedFlows(b.baseFlows, input.claims, input.grants)
+	const planned = plannedFlows(b.baseFlows, input.claims, input.grants, input.approvedClaimIds)
 	const flows: Record<string, Flow[]> = {}
 	const baseline: Forecast["baseline"] = {}
 	const plannedSeries: Forecast["planned"] = {}
