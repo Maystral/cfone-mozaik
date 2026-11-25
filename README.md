@@ -77,7 +77,8 @@ leaves the running app untouched), replaces the `cfone-mozaik` container on the 
 network, publishes port `3010` (repository variable `CFONE_MOZAIK_PORT` to change it), keeps
 accounts in the `cfone-mozaik-data` volume, and waits for the health check
 (`GET /healthz`). Repository secrets `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` switch it to a
-live model; without them it runs offline.
+live model; without them it runs offline. `MOZAIK_API_KEY` turns on Mozaik Cloud telemetry
+(content redacted with `MOZAIK_REDACTION=content`, or the repository variable of that name).
 
 ## How the agents run concurrently
 
@@ -142,14 +143,6 @@ live model; without them it runs offline.
 - Mozaik Cloud telemetry is off unless you set `MOZAIK_API_KEY`; `.env.example` sets
   `MOZAIK_REDACTION=content`.
 
-## How it maps to the judging
-
-| Criterion | Where |
-|---|---|
-| Useful (30) | A real household problem; one real job: month-end close plus early warning, across banks, formats and currencies |
-| Multi-agent design on Mozaik (30) | One reader per statement plus planners and checkers on one runtime, overlapping loops, shared state, five checks |
-| It works (25) | `npm install && npm run demo` with no key; live with Claude, OpenAI or a local model; tests |
-| Care with financial data (15) | Sources on every amount, Number Guard, reconciliation gate, sourced rates, synthetic data |
 
 ## Layout
 
