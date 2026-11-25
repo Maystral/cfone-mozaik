@@ -13,6 +13,7 @@ import { formatFact } from "./facts.ts"
 import { installCrashGuard, quietCloudWarning } from "./logging.ts"
 import { renderAction } from "./facts.ts"
 import { cookieValue, RateLimit, Sessions, UserStore } from "./auth.ts"
+import { activityLabel, attention, checks, upcoming } from "./views.ts"
 
 const WEB = resolve(fileURLToPath(new URL("../web/", import.meta.url)))
 const STATIC: Record<string, [string, string]> = { "/": ["index.html", "text/html; charset=utf-8"], "/app.js": ["app.js", "text/javascript; charset=utf-8"] }
@@ -60,7 +61,7 @@ export function createServer(config: Config, opts: ServerOptions = {}): Server {
 
 	const stateBody = () => {
 		const s = run?.ctx.state
-		if (!s) return { mode: config.mode, model: config.model, running, facts: {}, actions: [], position: {}, metrics: null, spans: [], forecast: null, brief: null, accounts: [], documents: [] }
+		if (!s) return { mode: config.mode, model: config.model, running, asOf: config.asOf, facts: {}, actions: [], position: {}, metrics: null, spans: [], forecast: null, brief: null, accounts: [], documents: [], attention: [], upcoming: [], checks: null, periodEnd: null }
 		const facts = Object.fromEntries(s.facts.list().map((f) => [f.id, { id: f.id, label: f.label, kind: f.kind, text: formatFact(f), currency: f.currency, sources: f.sources, derivedFrom: f.derivedFrom ?? [] }]))
 		const names = Object.fromEntries(s.getParticipants().map((p) => [p.getId(), p.getManifest().name]))
 		const f = s.forecast
@@ -74,7 +75,11 @@ export function createServer(config: Config, opts: ServerOptions = {}): Server {
 			accounts: [...s.accounts.values()],
 			documents: [...s.documents.values()].map((d) => ({ id: d.id, kind: d.kind, status: d.status, attempts: d.attempts, reason: d.reason })),
 			metrics: s.metrics,
-			spans: s.spans.map((x) => ({ ...x, name: names[x.agentId] ?? x.agentId })),
+			spans: s.spans.map((x) => ({ ...x, name: names[x.agentId] ?? x.agentId, label: activityLabel(names[x.agentId] ?? x.agentId) })),
+			periodEnd: [...s.statements.values()].map((x) => x.period.to).sort().at(-1) ?? null,
+			attention: attention(s, config),
+			upcoming: upcoming(s, config),
+			checks: checks(s),
 		}
 	}
 

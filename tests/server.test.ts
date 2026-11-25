@@ -70,6 +70,23 @@ test("the page runs a close over SSE, shows cited lines and takes approvals", as
 		assert.ok(state.facts["shortfall:cheque-000234"].sources.length > 0)
 		assert.ok(state.spans.length > 10)
 		assert.match(state.brief.html, /data-fact="position:have"/)
+		// Plain-language views for people who are not accountants.
+		assert.equal(state.attention.length, 3)
+		const rent = state.attention.find((a: { riskId: string }) => a.riskId === "cheque-000234")
+		assert.match(rent.headline, /Rent Q4/)
+		assert.match(rent.headline, /bounce/)
+		assert.equal(rent.daysAway, 17)
+		assert.equal(rent.coverage, "covered")
+		assert.equal(state.attention.find((a: { riskId: string }) => a.riskId === "cheque-000301").coverage, "partly")
+		assert.ok(state.upcoming.length >= 5)
+		assert.ok(state.upcoming.every((u: { date: string }) => u.date >= "2026-11-05"))
+		assert.ok(state.upcoming.some((u: { label: string; amountText: string }) => /Salary/i.test(u.label) && u.amountText.startsWith("+")))
+		assert.ok(state.upcoming.every((u: { sources: unknown[] }) => u.sources.length > 0))
+		assert.equal(state.checks.statements.verified, 10)
+		assert.deepEqual(state.checks.statements.reread.sort(), ["Bank B card · Oct 2026", "Bank B card · Sep 2026"])
+		assert.equal(state.checks.flags.length, 1)
+		assert.ok(state.spans.some((s: { label: string }) => s.label === "Reading Bank A card · Sep 2026"))
+		assert.ok(state.spans.some((s: { label: string }) => s.label === "Planning cash for cheques"))
 		const before = state.forecast.version
 		const id = state.actions[0].id
 		assert.equal((await post(`/api/actions/${id}/approve`)).status, 200)
