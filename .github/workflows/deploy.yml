@@ -1,0 +1,67 @@
+name: Deploy
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-cfone-mozaik
+  cancel-in-progress: false
+
+env:
+  APP: cfone-mozaik
+  PORT: ${{ vars.CFONE_MOZAIK_PORT || '3010' }}
+  NETWORK: ${{ vars.DOCKER_NETWORK_NAME || 'maystral' }}
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Type-check and tests run inside the build; a failure stops here and the running app stays up.
+      - name: Build Docker image
+        run: docker build -t $APP:latest .
+
+      - name: Ensure network
+        run: docker network inspect $NETWORK >/dev/null 2>&1 || docker network create $NETWORK
+
+      - name: Stop existing container
+        continue-on-error: true
+        run: |
+          docker stop $APP
+          docker rm $APP
+
+      - name: Start new container
+        run: |
+          docker run -d \
+            --name $APP \
+            --restart unless-stopped \
+            --network $NETWORK \
+            -p $PORT:3000 \
+            -v $APP-data:/data \
+            -e ANTHROPIC_API_KEY="${{ secrets.ANTHROPIC_API_KEY }}" \
+            -e OPENAI_API_KEY="${{ secrets.OPENAI_API_KEY }}" \
+            $APP:latest
+
+      - name: Wait until healthy
+        run: |
+          for i in $(seq 1 30); do
+            status=$(docker inspect --format '{{.State.Health.Status}}' $APP 2>/dev/null || echo missing)
+            echo "health: $status"
+            if [ "$status" = "healthy" ]; then
+              docker exec $APP node -e "fetch('http://127.0.0.1:3000/healthz').then(r=>r.json()).then(j=>console.log(JSON.stringify(j)))"
+              echo "CFOne is up on port $PORT (log in as demo / demo)"
+              exit 0
+            fi
+            sleep 5
+          done
+          docker logs --tail 50 $APP
+          exit 1
+
+      - name: Remove old images
+        continue-on-error: true
+        run: docker image prune -f

@@ -1,0 +1,10 @@
+cheque_no,account,payee,amount,currency,date,purpose
+000231,Bank A current 4417,Marina Heights Properties LLC,27500.00,AED,2026-02-22,Rent Q1
+000232,Bank A current 4417,Marina Heights Properties LLC,27500.00,AED,2026-05-22,Rent Q2
+000233,Bank A current 4417,Marina Heights Properties LLC,27500.00,AED,2026-08-22,Rent Q3
+000234,Bank A current 4417,Marina Heights Properties LLC,27500.00,AED,2026-11-22,Rent Q4
+000301,Bank A current 4417,Harbour Gate Developments,36000.00,AED,2027-01-15,Creekside Residences instalment 3
+000302,Bank A current 4417,Harbour Gate Developments,36000.00,AED,2027-07-15,Creekside Residences instalment 4
+000303,Bank A current 4417,Harbour Gate Developments,36000.00,AED,2028-01-15,Creekside Residences instalment 5
+000304,Bank A current 4417,Harbour Gate Developments,36000.00,AED,2028-07-15,Creekside Residences instalment 6
+000305,Bank A current 4417,Harbour Gate Developments,72000.00,AED,2029-01-15,Creekside Residences handover

@@ -430,6 +430,12 @@ These settle questions a builder would otherwise have to guess. Change them only
 10. **Account ids** come from the printed bank name, product and last four
     (`bank-a-current-4417`), so a new bank needs no code.
 
+11. **Accounts and deploy (added 25 Nov).** The page sits behind a login: registration and
+    login with scrypt-hashed passwords in a JSON file and an in-memory HttpOnly session, built
+    on `node:crypto` only (no new dependency); `demo` / `demo` is seeded. The app ships as a
+    Docker image deployed by GitHub Actions to the self-hosted runner, like the other Maystral
+    projects. This supersedes the non-goal "auth"; the household data stays synthetic and shared.
+
 ## 20. Left to the builder
 
 Prompt wording, PDF visual style, CSS, the exact lane-chart drawing, log format, and which

@@ -1,0 +1,16 @@
+# Local or Pi: docker compose up -d, then open http://localhost:3000 and log in as demo / demo.
+services:
+  cfone:
+    build: .
+    image: cfone-mozaik:local
+    container_name: cfone-mozaik
+    ports:
+      - "${CFONE_PORT:-3000}:3000"
+    env_file:
+      - path: .env
+        required: false
+    volumes:
+      - cfone-data:/data
+    restart: unless-stopped
+volumes:
+  cfone-data: {}

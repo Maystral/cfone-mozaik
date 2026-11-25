@@ -1,0 +1,8 @@
+node_modules
+.git
+.github
+out
+.data
+.env
+.superpowers
+docs/img

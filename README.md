@@ -7,7 +7,7 @@ format and currency, and warns before a payment bounces or a card charges intere
 [Mozaik](https://docs.jigjoy.ai). First built at the JigJoy Black Friday AI Hackathon, track
 *Agents in Finance*.
 
-<!-- Task 16: add docs/img/cfone-desktop.png here -->
+![CFOne after an offline close: position, swarm lanes, radar, sourced actions](docs/img/desktop.png)
 
 > The demo uses synthetic data only: fictional people, Bank A, Bank B and Bank C, and
 > fictional merchants. Not financial advice.
@@ -40,7 +40,11 @@ You approve or snooze. CFOne never moves money.
 
 ## Run it
 
-Node 22 or newer.
+**Quickest, with Docker:** `docker compose up -d`, open http://localhost:3000 and press
+**Try the demo** (user `demo`, password `demo`), or create your own account. The page runs a
+close on start, so numbers are there on first login; **Run close** runs it again live.
+
+**Without Docker,** Node 22 or newer:
 
 ```bash
 npm install
@@ -48,12 +52,32 @@ npm run demo                          # offline: no API key needed (scripted mod
 ANTHROPIC_API_KEY=sk-... npm run demo # live with Claude (claude-sonnet-5-5)
 OPENAI_API_KEY=sk-... npm run demo    # live with OpenAI (gpt-5.5)
 CFONE_OPENAI_BASE_URL=http://localhost:11434/v1 CFONE_MODEL=<model> npm run demo   # any OpenAI-compatible server
-npm start                             # the page on http://localhost:3000
+npm start                             # the page on http://localhost:3000 (log in as demo / demo)
 npm test
+npm run typecheck
 ```
 
 Or copy `.env.example` to `.env`. The synthetic documents are committed under
 `data/synthetic/`; `npm run gen` regenerates them from `data/scenario/`.
+
+**Demo data.** One fictional household (Luka and Mila): ten statements from Bank A, Bank B and
+Bank C (PDF and CSV, AED and EUR), a cheque register, a property payment plan, card key facts
+and an exchange-rate file. Everything is generated from `data/scenario/household.scenario.json`;
+no real bank, person or account appears anywhere.
+
+**Accounts.** Registration and login use scrypt-hashed passwords in `users.json` under
+`CFONE_STATE_DIR` (`/data` in Docker, a named volume) and an HttpOnly session cookie; login
+attempts are rate-limited. `demo` / `demo` is created on first start. Accounts gate the page; the
+household data is the shared synthetic demo.
+
+**Deploy.** `.github/workflows/ci.yml` type-checks, tests and runs the offline demo on every
+pull request. `.github/workflows/deploy.yml` runs on the self-hosted runner on every push to
+`main`: it builds the image (type-check and tests run inside the build, so a failing check
+leaves the running app untouched), replaces the `cfone-mozaik` container on the `maystral`
+network, publishes port `3010` (repository variable `CFONE_MOZAIK_PORT` to change it), keeps
+accounts in the `cfone-mozaik-data` volume, and waits for the health check
+(`GET /healthz`). Repository secrets `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` switch it to a
+live model; without them it runs offline.
 
 ## How the agents run concurrently
 
@@ -68,7 +92,16 @@ Or copy `.env.example` to `.env`. The synthetic documents are committed under
   read; both sentinels then plan at the same time and compete for the same cash.
 - **Measured, not claimed.** Every run prints the lane chart and
   `peak concurrent loops · LLM loops · rejections caught · conflicts settled · drafts blocked`.
-  <!-- Task 18: paste the metrics line from docs/runs/2026-11-27-live.md -->
+  An offline run on the demo data ([full log](docs/runs/2026-11-25-offline.md)):
+
+  ```
+  participants: 22 · peak concurrent loops: 23 · LLM loops: 29 · rejections caught: 2 · conflicts settled: 2 · drafts blocked: 0 · facts: 94
+  ```
+
+  Peak concurrent loops counts loops open at once (ten readers, the clerk's three documents and
+  the categoriser's ten statements overlap); the `SafeRunner` caps inferences actually in flight
+  at six (`CFONE_MAX_IN_FLIGHT`) to respect provider rate limits. Try `CFONE_CHAOS=1 npm run demo`
+  to watch the Number Guard block drafts that type a number.
 
 ## The checks between agents
 
@@ -121,7 +154,7 @@ Or copy `.env.example` to `.env`. The synthetic documents are committed under
 ## Layout
 
 ```
-src/            runtime, agents, domain logic, inference, CLI, server
+src/            runtime, agents, domain logic, inference, CLI, server, accounts
 web/            the page (no build step)
 data/synthetic/ generated documents the app reads
 data/scenario/  the scenario and golden values (generator and tests only)
@@ -129,11 +162,19 @@ docs/           design, plan, data spec, Mozaik notes, demo script
 tests/          node:test suites
 ```
 
+## Screens
+
+| Source drawer | Phone width | Log in |
+|---|---|---|
+| ![A chip opens the facts and lines behind an amount](docs/img/drawer.png) | ![The page at 390 px](docs/img/mobile.png) | ![Log in or try the demo](docs/img/login.png) |
+
 ## Limits and next
 
 - The demo reads five synthetic layouts across three banks; the readers have no bank-specific
   code. Scanned statements need OCR first.
 - Moving money between currencies is suggested, not reserved.
+- The live-model prompts are written but this build has only been run end to end with the
+  offline scripted model; a recorded live run is still to come.
 - Next: scans and more formats, cross-currency planning with sourced rates, a second rule-based
   reader on every statement, and "Ask CFOne" questions answered by parallel analysts behind the
   same Number Guard.

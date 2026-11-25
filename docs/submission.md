@@ -5,7 +5,7 @@
 **One line:** A team of agents that closes a household's books from statements of any bank,
 format and currency, and warns before a payment bounces.
 
-**Repository:** https://github.com/<you>/cfone
+**Repository:** https://github.com/Maystral/cfone-mozaik
 
 **Description**
 
@@ -29,9 +29,9 @@ with a hint when the numbers do not add up. The forecaster recomputes whenever v
 change; two sentinels then plan in parallel and compete for the same cash, and the treasurer
 settles their claims by policy, independent of who was faster. A Mozaik interception handler
 blocks any draft containing a number the model typed. Every run prints its lane chart and
-measured peak concurrency. <!-- paste the metrics line from the live run -->
+measured peak concurrency. Offline run on the demo data: 22 participants, peak 23 concurrent loops, 29 loops, 2 rejections caught, 2 conflicts settled, 0 drafts blocked (`CFONE_CHAOS=1` shows the guard blocking). <!-- replace with the live run line when recorded -->
 
 **Run:** `npm install && npm run demo` (no key needed), or with `ANTHROPIC_API_KEY` /
 `OPENAI_API_KEY` for live models; `npm start` for the page.
 
-**Screenshots / video:** <!-- docs/img/*.png, video link -->
+**Screenshots / video:** docs/img/desktop.png, docs/img/drawer.png, docs/img/mobile.png <!-- add video link -->

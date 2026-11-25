@@ -8,7 +8,15 @@
     "noEmit": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
-    "types": ["node"]
+    "types": [
+      "node"
+    ],
+    "allowImportingTsExtensions": true
   },
-  "include": ["src", "tools", "tests", "docs/reference"]
+  "include": [
+    "src",
+    "tools",
+    "tests",
+    "docs/reference"
+  ]
 }
