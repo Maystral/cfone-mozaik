@@ -30,7 +30,25 @@ export interface RunningClose { ctx: Ctx; youId: string; done: Promise<CloseResu
 export function renderBrief(state: HouseholdState): { plain: string; html: string } | undefined {
 	if (!state.brief) return undefined
 	const r = render(state.brief.markdown, state.facts, state.accounts)
-	return { plain: `${r.plain}\n\n${DISCLAIMER}`, html: `${r.html}\n\n${DISCLAIMER}` }
+	return { plain: `${r.plain}\n\n${DISCLAIMER}`, html: `${markdownHtml(r.html)}<p class="disclaimer">${DISCLAIMER}</p>` }
+}
+
+/** Minimal Markdown on already-escaped HTML: headings, bold, bullet lists, paragraphs. */
+export function markdownHtml(html: string): string {
+	const out: string[] = []
+	let list = false
+	for (const raw of html.split("\n")) {
+		const line = raw.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+		const li = /^\s*[-*] (.*)$/.exec(line)
+		if (!li && list) { out.push("</ul>"); list = false }
+		if (li) { if (!list) { out.push("<ul>"); list = true } out.push(`<li>${li[1]}</li>`) }
+		else if (/^### /.test(line)) out.push(`<h5>${line.slice(4)}</h5>`)
+		else if (/^## /.test(line)) out.push(`<h4>${line.slice(3)}</h4>`)
+		else if (/^# /.test(line)) out.push(`<h3>${line.slice(2)}</h3>`)
+		else if (line.trim()) out.push(`<p>${line}</p>`)
+	}
+	if (list) out.push("</ul>")
+	return out.join("\n")
 }
 
 export function liveActions(state: HouseholdState): { plain: string; html: string; id: string }[] {

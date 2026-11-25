@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CFOne</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand"><strong>CFOne</strong> <span id="title">Household close</span></div>
+  <div class="meta"><span id="mode" class="badge">…</span> <span class="nfa">Not financial advice</span></div>
+  <button id="run" class="primary">Run close</button>
+</header>
+<main>
+  <section class="tiles" id="tiles" aria-label="Position">
+    <div class="tile"><div class="k">Have</div><div class="v" id="have">—</div><div class="s" id="have-note"></div></div>
+    <div class="tile"><div class="k">Owe</div><div class="v" id="owe">—</div><div class="s">card balances</div></div>
+    <div class="tile"><div class="k">Promised · 90 days</div><div class="v" id="promised">—</div><div class="s">cheques</div></div>
+  </section>
+  <div class="grid">
+    <section class="panel" aria-labelledby="swarm-h">
+      <h2 id="swarm-h">Swarm</h2>
+      <div id="lanes" class="lanes"><p class="empty">Press <b>Run close</b>. Each row is an agent; bars are its model loops.</p></div>
+      <p id="metrics" class="metrics"></p>
+      <ol id="ticker" class="ticker"></ol>
+    </section>
+    <section class="panel" aria-labelledby="radar-h">
+      <h2 id="radar-h">Radar · next 90 days</h2>
+      <div id="radar"></div>
+    </section>
+    <section class="panel wide" aria-labelledby="actions-h">
+      <h2 id="actions-h">Actions</h2>
+      <div id="actions"><p class="empty">Proposed actions appear here. Nothing moves money; approving updates the plan.</p></div>
+    </section>
+    <section class="panel wide" aria-labelledby="brief-h">
+      <h2 id="brief-h">Brief</h2>
+      <div id="brief" class="brief"><p class="empty">Written when the close settles.</p></div>
+    </section>
+  </div>
+</main>
+<aside id="drawer" class="drawer" hidden>
+  <div class="drawer-head"><h3 id="drawer-title">Source</h3><button id="drawer-close" aria-label="Close">✕</button></div>
+  <div id="drawer-body"></div>
+</aside>
+<footer class="foot">Synthetic data · fictional banks · Not financial advice. Every amount links to the line it came from.</footer>
+<script src="/app.js" type="module"></script>
+</body>
+</html>

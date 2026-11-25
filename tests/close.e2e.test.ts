@@ -18,6 +18,8 @@ test("a full offline close finds the golden position, actions and cover", async 
 	assert.equal(r.metrics.blocked, 0)
 	assert.ok(r.metrics.participants >= 22, `participants ${r.metrics.participants}`)
 	assert.ok(r.metrics.facts > 50)
+	assert.match(r.brief!.html, /<h3>Household close to 31 Oct 2026<\/h3>/)
+	assert.ok(!r.brief!.html.includes("**"))
 	assert.ok(!/\d/.test(r.brief!.plain.replace(/(AED|EUR) [\d,]+\.\d{2}|\d{1,2} [A-Z][a-z]{2} \d{4}|cheque \d+|·\d{4}|\d+\.\d{4}|\d+(\.\d+)?%/g, "")), r.brief!.plain)
 })
 
