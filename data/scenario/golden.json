@@ -1,0 +1,334 @@
+{
+ "asOf": "2026-11-05",
+ "horizonEnd": "2027-02-03",
+ "homeCurrency": "AED",
+ "buffersMinor": {
+  "AED": 50000,
+  "EUR": 10000
+ },
+ "fx": {
+  "date": "2026-10-31",
+  "base": "EUR",
+  "quote": "AED",
+  "rate": "4.2500",
+  "source": "Sample rate for the synthetic demo"
+ },
+ "statements": {
+  "bank-a-current-4417": {
+   "2026-09": {
+    "opening": 2120485,
+    "totalDebits": 3489700,
+    "totalCredits": 2800000,
+    "closing": 1430785
+   },
+   "2026-10": {
+    "opening": 1430785,
+    "totalDebits": 1719750,
+    "totalCredits": 3000000,
+    "closing": 2711035
+   }
+  },
+  "bank-b-current-0263": {
+   "2026-09": {
+    "opening": 370310,
+    "totalDebits": 1734030,
+    "totalCredits": 2200000,
+    "closing": 836280
+   },
+   "2026-10": {
+    "opening": 836280,
+    "totalDebits": 2021280,
+    "totalCredits": 2200000,
+    "closing": 1015000
+   }
+  },
+  "bank-c-current-7710": {
+   "2026-09": {
+    "opening": 437363,
+    "totalDebits": 6499,
+    "totalCredits": 310,
+    "closing": 431174
+   },
+   "2026-10": {
+    "opening": 431174,
+    "totalDebits": 6499,
+    "totalCredits": 325,
+    "closing": 425000
+   }
+  },
+  "bank-a-card-8821": {
+   "2026-09": {
+    "previous": 1095540,
+    "payments": 1095540,
+    "purchases": 1168715,
+    "financeCharges": 0,
+    "newBalance": 1168715,
+    "minimumDue": 58436,
+    "dueDate": "2026-10-28",
+    "tableOnlyBalance": 1168715
+   },
+   "2026-10": {
+    "previous": 1168715,
+    "payments": 1168715,
+    "purchases": 1287025,
+    "financeCharges": 0,
+    "newBalance": 1287025,
+    "minimumDue": 64351,
+    "dueDate": "2026-11-28",
+    "tableOnlyBalance": 1287025
+   }
+  },
+  "bank-b-card-5530": {
+   "2026-09": {
+    "previous": 598000,
+    "payments": 120000,
+    "purchases": 214560,
+    "financeCharges": 15535,
+    "newBalance": 708095,
+    "minimumDue": 35405,
+    "dueDate": "2026-10-20",
+    "tableOnlyBalance": 692560
+   },
+   "2026-10": {
+    "previous": 708095,
+    "payments": 200000,
+    "purchases": 106640,
+    "financeCharges": 16513,
+    "newBalance": 631248,
+    "minimumDue": 31562,
+    "dueDate": "2026-11-20",
+    "tableOnlyBalance": 614735
+   }
+  }
+ },
+ "position": {
+  "haveMinor": 5532285,
+  "oweMinor": 1918273,
+  "promised90Minor": 6350000,
+  "promisedAllMinor": 24350000,
+  "haveByAccount": {
+   "bank-a-current-4417": 2711035,
+   "bank-b-current-0263": 1015000,
+   "bank-c-current-7710": {
+    "minor": 425000,
+    "currency": "EUR",
+    "homeMinor": 1806250
+   }
+  }
+ },
+ "recurring": [
+  {
+   "accountId": "bank-a-current-4417",
+   "description": "CAR LOAN EMI",
+   "amountMinor": -320000,
+   "day": 2
+  },
+  {
+   "accountId": "bank-a-current-4417",
+   "description": "ATM WITHDRAWAL MARINA",
+   "amountMinor": -100000,
+   "day": 5
+  },
+  {
+   "accountId": "bank-a-current-4417",
+   "description": "ELECTRICITY AND WATER BILL",
+   "amountMinor": -91135,
+   "day": 12
+  },
+  {
+   "accountId": "bank-a-current-4417",
+   "description": "MOBILE POSTPAID",
+   "amountMinor": -39900,
+   "day": 14
+  },
+  {
+   "accountId": "bank-a-current-4417",
+   "description": "SALARY ACME TRADING LLC",
+   "amountMinor": 2800000,
+   "day": 27
+  },
+  {
+   "accountId": "bank-b-current-0263",
+   "description": "FITHUB MEMBERSHIP",
+   "amountMinor": -35000,
+   "day": 10
+  },
+  {
+   "accountId": "bank-b-current-0263",
+   "description": "FRESH MART GROCERY",
+   "amountMinor": -71280,
+   "day": 22
+  },
+  {
+   "accountId": "bank-b-current-0263",
+   "description": "SALARY BLUE OCEAN LLC",
+   "amountMinor": 2200000,
+   "day": 25
+  },
+  {
+   "accountId": "bank-b-current-0263",
+   "description": "LITTLE STARS NURSERY",
+   "amountMinor": -315000,
+   "day": 28
+  },
+  {
+   "accountId": "bank-b-current-0263",
+   "description": "FAMILY SUPPORT TRANSFER",
+   "amountMinor": -1200000,
+   "day": 29
+  },
+  {
+   "accountId": "bank-c-current-7710",
+   "description": "INSURANCE PREMIUM",
+   "amountMinor": -4500,
+   "day": 3
+  },
+  {
+   "accountId": "bank-c-current-7710",
+   "description": "INTEREST",
+   "amountMinor": 325,
+   "day": 15
+  },
+  {
+   "accountId": "bank-c-current-7710",
+   "description": "PHONE PLAN HOME",
+   "amountMinor": -1999,
+   "day": 20
+  }
+ ],
+ "bankACardAutopayEstimateMinor": 1227870,
+ "risksBaseline": [
+  {
+   "id": "cheque-000234",
+   "type": "cheque_shortfall",
+   "accountId": "bank-a-current-4417",
+   "date": "2026-11-22",
+   "amountMinor": 2750000,
+   "projectedBeforeMinor": 2160000,
+   "shortfallMinor": 640000
+  },
+  {
+   "id": "cheque-000301",
+   "type": "cheque_shortfall",
+   "accountId": "bank-a-current-4417",
+   "date": "2027-01-15",
+   "amountMinor": 3600000,
+   "projectedBeforeMinor": 1393035,
+   "shortfallMinor": 2256965
+  },
+  {
+   "id": "autopay-bank-a-card-8821-2027-01-28",
+   "type": "autopay_shortfall",
+   "accountId": "bank-a-current-4417",
+   "date": "2027-01-28",
+   "amountMinor": 1227870,
+   "projectedBeforeMinor": 593035,
+   "shortfallMinor": 684835
+  },
+  {
+   "id": "card-bank-b-card-5530-2026-11-20",
+   "type": "card_interest",
+   "accountId": "bank-b-card-5530",
+   "date": "2026-11-20",
+   "fullMinor": 631248,
+   "minimumMinor": 31562,
+   "monthlyRatePct": "3.25"
+  }
+ ],
+ "grantsRound1": [
+  {
+   "id": "rent",
+   "riskId": "cheque-000234",
+   "priority": 1,
+   "from": "bank-b-current-0263",
+   "to": "bank-a-current-4417",
+   "requestedMinor": 640000,
+   "byDate": "2026-11-21",
+   "grantedMinor": 640000,
+   "availableMinor": 858720,
+   "windowEnds": "2026-11-25",
+   "status": "granted"
+  },
+  {
+   "id": "card",
+   "riskId": "card-bank-b-card-5530-2026-11-20",
+   "priority": 3,
+   "from": "bank-b-current-0263",
+   "to": "bank-b-card-5530",
+   "requestedMinor": 631248,
+   "byDate": "2026-11-20",
+   "grantedMinor": 218720,
+   "availableMinor": 218720,
+   "windowEnds": "2026-11-25",
+   "status": "partial"
+  }
+ ],
+ "grantsFinal": [
+  {
+   "id": "rent",
+   "riskId": "cheque-000234",
+   "priority": 1,
+   "from": "bank-b-current-0263",
+   "to": "bank-a-current-4417",
+   "requestedMinor": 640000,
+   "byDate": "2026-11-21",
+   "grantedMinor": 640000,
+   "availableMinor": 858720,
+   "windowEnds": "2026-11-25",
+   "status": "granted"
+  },
+  {
+   "id": "card",
+   "riskId": "card-bank-b-card-5530-2026-11-20",
+   "priority": 3,
+   "from": "bank-b-current-0263",
+   "to": "bank-b-card-5530",
+   "requestedMinor": 631248,
+   "byDate": "2026-11-20",
+   "grantedMinor": 218720,
+   "availableMinor": 218720,
+   "windowEnds": "2026-11-25",
+   "status": "partial"
+  },
+  {
+   "id": "card-rest",
+   "riskId": "card-bank-b-card-5530-2026-11-20",
+   "priority": 3,
+   "from": "bank-b-current-0263",
+   "to": "bank-b-card-5530",
+   "requestedMinor": 412528,
+   "byDate": "2026-11-25",
+   "grantedMinor": 412528,
+   "availableMinor": 578720,
+   "windowEnds": "2026-12-25",
+   "status": "granted"
+  },
+  {
+   "id": "property",
+   "riskId": "cheque-000301",
+   "priority": 1,
+   "from": "bank-b-current-0263",
+   "to": "bank-a-current-4417",
+   "requestedMinor": 1616965,
+   "byDate": "2027-01-14",
+   "grantedMinor": 744912,
+   "availableMinor": 744912,
+   "windowEnds": "2027-01-25",
+   "status": "partial"
+  }
+ ],
+ "cardRemainderMinor": 412528,
+ "cardInterestEstimateMinor": 13407,
+ "january": {
+  "shortfallMinor": 1616965,
+  "fundedMinor": 744912,
+  "residualMinor": 872053
+ },
+ "cover": {
+  "riskId": "cheque-000301",
+  "accountId": "bank-c-current-7710",
+  "currency": "EUR",
+  "needMinor": 205189,
+  "freeMinor": 391978
+ }
+}

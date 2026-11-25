@@ -1,0 +1,743 @@
+{
+ "_note": "Generator input for synthetic documents. Fictional people, banks and merchants. The app never reads this file.",
+ "profile": {
+  "asOf": "2026-11-05",
+  "horizonDays": 90,
+  "homeCurrency": "AED",
+  "buffersMinor": {
+   "AED": 50000,
+   "EUR": 10000
+  },
+  "priorities": {
+   "cheque": 1,
+   "autopay": 2,
+   "card_payment": 3
+  }
+ },
+ "people": [
+  {
+   "id": "luka",
+   "name": "Luka"
+  },
+  {
+   "id": "mila",
+   "name": "Mila"
+  }
+ ],
+ "banks": [
+  {
+   "id": "bank-a",
+   "name": "Bank A",
+   "note": "traditional bank with a cheque book, PDF statements"
+  },
+  {
+   "id": "bank-b",
+   "name": "Bank B",
+   "note": "digital bank, PDF statements"
+  },
+  {
+   "id": "bank-c",
+   "name": "Bank C",
+   "note": "bank in another country, EUR, CSV exports"
+  }
+ ],
+ "accounts": [
+  {
+   "id": "bank-a-current-4417",
+   "bank": "bank-a",
+   "kind": "current",
+   "owner": "luka",
+   "last4": "4417",
+   "currency": "AED",
+   "format": "pdf"
+  },
+  {
+   "id": "bank-a-card-8821",
+   "bank": "bank-a",
+   "kind": "card",
+   "owner": "luka",
+   "last4": "8821",
+   "currency": "AED",
+   "format": "pdf",
+   "cardholders": [
+    {
+     "person": "luka",
+     "last4": "8821",
+     "role": "primary"
+    },
+    {
+     "person": "mila",
+     "last4": "8839",
+     "role": "supplementary"
+    }
+   ],
+   "limit": 4000000,
+   "dueDay": 28,
+   "autopay": {
+    "from": "bank-a-current-4417",
+    "mode": "full"
+   }
+  },
+  {
+   "id": "bank-b-current-0263",
+   "bank": "bank-b",
+   "kind": "current",
+   "owner": "mila",
+   "last4": "0263",
+   "currency": "AED",
+   "format": "pdf"
+  },
+  {
+   "id": "bank-b-card-5530",
+   "bank": "bank-b",
+   "kind": "card",
+   "owner": "mila",
+   "last4": "5530",
+   "currency": "AED",
+   "format": "pdf",
+   "cardholders": [
+    {
+     "person": "mila",
+     "last4": "5530",
+     "role": "primary"
+    }
+   ],
+   "limit": 1500000,
+   "dueDay": 20,
+   "autopay": null
+  },
+  {
+   "id": "bank-c-current-7710",
+   "bank": "bank-c",
+   "kind": "current",
+   "owner": "luka",
+   "last4": "7710",
+   "currency": "EUR",
+   "format": "csv"
+  }
+ ],
+ "cardTerms": {
+  "bank-a-card-8821": {
+   "minDuePct": "5",
+   "monthlyRatePct": "3.49",
+   "lateFee": 23000
+  },
+  "bank-b-card-5530": {
+   "minDuePct": "5",
+   "monthlyRatePct": "3.25",
+   "lateFee": 23000,
+   "quirk": "finance charges appear only in the summary box, not in the transaction table"
+  }
+ },
+ "statements": {
+  "bank-a-current-4417": {
+   "2026-09": {
+    "opening": 2120485,
+    "rows": [
+     {
+      "date": "2026-09-02",
+      "description": "CAR LOAN EMI 0091",
+      "amountMinor": -320000
+     },
+     {
+      "date": "2026-09-05",
+      "description": "ATM WITHDRAWAL MARINA",
+      "amountMinor": -100000
+     },
+     {
+      "date": "2026-09-12",
+      "description": "ELECTRICITY AND WATER BILL",
+      "amountMinor": -84260
+     },
+     {
+      "date": "2026-09-14",
+      "description": "MOBILE POSTPAID",
+      "amountMinor": -39900
+     },
+     {
+      "date": "2026-09-16",
+      "description": "GREENFIELD ACADEMY TERM 1 FEES",
+      "amountMinor": -1850000
+     },
+     {
+      "date": "2026-09-27",
+      "description": "SALARY ACME TRADING LLC",
+      "amountMinor": 2800000
+     },
+     {
+      "date": "2026-09-28",
+      "description": "BANK A CARD AUTOPAY",
+      "amountMinor": -1095540
+     }
+    ]
+   },
+   "2026-10": {
+    "rows": [
+     {
+      "date": "2026-10-02",
+      "description": "CAR LOAN EMI 0091",
+      "amountMinor": -320000
+     },
+     {
+      "date": "2026-10-05",
+      "description": "ATM WITHDRAWAL MARINA",
+      "amountMinor": -100000
+     },
+     {
+      "date": "2026-10-12",
+      "description": "ELECTRICITY AND WATER BILL",
+      "amountMinor": -91135
+     },
+     {
+      "date": "2026-10-14",
+      "description": "MOBILE POSTPAID",
+      "amountMinor": -39900
+     },
+     {
+      "date": "2026-10-20",
+      "description": "TRANSFER FROM BANK B",
+      "amountMinor": 200000
+     },
+     {
+      "date": "2026-10-27",
+      "description": "SALARY ACME TRADING LLC",
+      "amountMinor": 2800000
+     },
+     {
+      "date": "2026-10-28",
+      "description": "BANK A CARD AUTOPAY",
+      "amountMinor": -1168715
+     }
+    ]
+   }
+  },
+  "bank-b-current-0263": {
+   "2026-09": {
+    "opening": 370310,
+    "rows": [
+     {
+      "date": "2026-09-10",
+      "description": "FITHUB MEMBERSHIP",
+      "amountMinor": -35000
+     },
+     {
+      "date": "2026-09-18",
+      "description": "BANK B CARD PAYMENT",
+      "amountMinor": -120000
+     },
+     {
+      "date": "2026-09-22",
+      "description": "FRESH MART GROCERY",
+      "amountMinor": -64030
+     },
+     {
+      "date": "2026-09-25",
+      "description": "SALARY BLUE OCEAN LLC",
+      "amountMinor": 2200000
+     },
+     {
+      "date": "2026-09-28",
+      "description": "LITTLE STARS NURSERY",
+      "amountMinor": -315000
+     },
+     {
+      "date": "2026-09-29",
+      "description": "FAMILY SUPPORT TRANSFER",
+      "amountMinor": -1200000
+     }
+    ]
+   },
+   "2026-10": {
+    "rows": [
+     {
+      "date": "2026-10-10",
+      "description": "FITHUB MEMBERSHIP",
+      "amountMinor": -35000
+     },
+     {
+      "date": "2026-10-18",
+      "description": "BANK B CARD PAYMENT",
+      "amountMinor": -200000
+     },
+     {
+      "date": "2026-10-20",
+      "description": "TRANSFER TO BANK A",
+      "amountMinor": -200000
+     },
+     {
+      "date": "2026-10-22",
+      "description": "FRESH MART GROCERY",
+      "amountMinor": -71280
+     },
+     {
+      "date": "2026-10-25",
+      "description": "SALARY BLUE OCEAN LLC",
+      "amountMinor": 2200000
+     },
+     {
+      "date": "2026-10-28",
+      "description": "LITTLE STARS NURSERY",
+      "amountMinor": -315000
+     },
+     {
+      "date": "2026-10-29",
+      "description": "FAMILY SUPPORT TRANSFER",
+      "amountMinor": -1200000
+     }
+    ]
+   }
+  },
+  "bank-c-current-7710": {
+   "2026-09": {
+    "opening": 437363,
+    "rows": [
+     {
+      "date": "2026-09-03",
+      "description": "INSURANCE PREMIUM",
+      "amountMinor": -4500
+     },
+     {
+      "date": "2026-09-15",
+      "description": "INTEREST",
+      "amountMinor": 310
+     },
+     {
+      "date": "2026-09-20",
+      "description": "PHONE PLAN HOME",
+      "amountMinor": -1999
+     }
+    ]
+   },
+   "2026-10": {
+    "rows": [
+     {
+      "date": "2026-10-03",
+      "description": "INSURANCE PREMIUM",
+      "amountMinor": -4500
+     },
+     {
+      "date": "2026-10-15",
+      "description": "INTEREST",
+      "amountMinor": 325
+     },
+     {
+      "date": "2026-10-20",
+      "description": "PHONE PLAN HOME",
+      "amountMinor": -1999
+     }
+    ]
+   }
+  },
+  "bank-a-card-8821": {
+   "2026-09": {
+    "previous": 1095540,
+    "rows": [
+     {
+      "date": "2026-09-03",
+      "description": "HYPERMARKET MARINA",
+      "amountMinor": 48625,
+      "card": "8821"
+     },
+     {
+      "date": "2026-09-06",
+      "description": "FUEL STATION",
+      "amountMinor": 21000,
+      "card": "8821"
+     },
+     {
+      "date": "2026-09-09",
+      "description": "CINEMA DOWNTOWN",
+      "amountMinor": 14500,
+      "card": "8821"
+     },
+     {
+      "date": "2026-09-11",
+      "description": "ONLINE MARKETPLACE",
+      "amountMinor": 124900,
+      "card": "8821"
+     },
+     {
+      "date": "2026-09-15",
+      "description": "SKYLINE AIRWAYS TICKETS",
+      "amountMinor": 388000,
+      "card": "8821"
+     },
+     {
+      "date": "2026-09-19",
+      "description": "RESTAURANT DOWNTOWN",
+      "amountMinor": 61250,
+      "card": "8821"
+     },
+     {
+      "date": "2026-09-24",
+      "description": "FUEL STATION",
+      "amountMinor": 20500,
+      "card": "8821"
+     },
+     {
+      "date": "2026-09-27",
+      "description": "HYPERMARKET MARINA",
+      "amountMinor": 53280,
+      "card": "8821"
+     },
+     {
+      "date": "2026-09-28",
+      "description": "PAYMENT RECEIVED - THANK YOU",
+      "amountMinor": -1095540,
+      "card": "8821"
+     },
+     {
+      "date": "2026-09-04",
+      "description": "KIDS CLOTHING MALL",
+      "amountMinor": 38900,
+      "card": "8839"
+     },
+     {
+      "date": "2026-09-08",
+      "description": "PHARMACY",
+      "amountMinor": 9640,
+      "card": "8839"
+     },
+     {
+      "date": "2026-09-13",
+      "description": "FOOD DELIVERY APP",
+      "amountMinor": 15430,
+      "card": "8839"
+     },
+     {
+      "date": "2026-09-17",
+      "description": "BEAUTY SALON MARINA",
+      "amountMinor": 45000,
+      "card": "8839"
+     },
+     {
+      "date": "2026-09-21",
+      "description": "FOOD DELIVERY APP",
+      "amountMinor": 18890,
+      "card": "8839"
+     },
+     {
+      "date": "2026-09-25",
+      "description": "HOME FURNISHINGS MALL",
+      "amountMinor": 308800,
+      "card": "8839"
+     }
+    ]
+   },
+   "2026-10": {
+    "rows": [
+     {
+      "date": "2026-10-02",
+      "description": "HYPERMARKET MARINA",
+      "amountMinor": 51240,
+      "card": "8821"
+     },
+     {
+      "date": "2026-10-05",
+      "description": "FUEL STATION",
+      "amountMinor": 21500,
+      "card": "8821"
+     },
+     {
+      "date": "2026-10-08",
+      "description": "ELECTRONICS STORE",
+      "amountMinor": 279900,
+      "card": "8821"
+     },
+     {
+      "date": "2026-10-12",
+      "description": "RESTAURANT DOWNTOWN",
+      "amountMinor": 48700,
+      "card": "8821"
+     },
+     {
+      "date": "2026-10-16",
+      "description": "ONLINE MARKETPLACE",
+      "amountMinor": 86450,
+      "card": "8821"
+     },
+     {
+      "date": "2026-10-20",
+      "description": "FUEL STATION",
+      "amountMinor": 22000,
+      "card": "8821"
+     },
+     {
+      "date": "2026-10-23",
+      "description": "HARBOUR HOTEL BOOKING",
+      "amountMinor": 195000,
+      "card": "8821"
+     },
+     {
+      "date": "2026-10-28",
+      "description": "PAYMENT RECEIVED - THANK YOU",
+      "amountMinor": -1168715,
+      "card": "8821"
+     },
+     {
+      "date": "2026-10-29",
+      "description": "HYPERMARKET MARINA",
+      "amountMinor": 59835,
+      "card": "8821"
+     },
+     {
+      "date": "2026-10-03",
+      "description": "PHARMACY",
+      "amountMinor": 11260,
+      "card": "8839"
+     },
+     {
+      "date": "2026-10-07",
+      "description": "FOOD DELIVERY APP",
+      "amountMinor": 17620,
+      "card": "8839"
+     },
+     {
+      "date": "2026-10-11",
+      "description": "KIDS CLOTHING MALL",
+      "amountMinor": 64500,
+      "card": "8839"
+     },
+     {
+      "date": "2026-10-18",
+      "description": "BEAUTY SALON MARINA",
+      "amountMinor": 45000,
+      "card": "8839"
+     },
+     {
+      "date": "2026-10-22",
+      "description": "FOOD DELIVERY APP",
+      "amountMinor": 20370,
+      "card": "8839"
+     },
+     {
+      "date": "2026-10-26",
+      "description": "FURNITURE STORE",
+      "amountMinor": 363650,
+      "card": "8839"
+     }
+    ]
+   }
+  },
+  "bank-b-card-5530": {
+   "2026-09": {
+    "previous": 598000,
+    "rows": [
+     {
+      "date": "2026-09-05",
+      "description": "STREAMING SUBSCRIPTION",
+      "amountMinor": 5600,
+      "card": "5530"
+     },
+     {
+      "date": "2026-09-09",
+      "description": "COFFEE SHOP",
+      "amountMinor": 3850,
+      "card": "5530"
+     },
+     {
+      "date": "2026-09-14",
+      "description": "BOOKSHOP MALL",
+      "amountMinor": 21400,
+      "card": "5530"
+     },
+     {
+      "date": "2026-09-18",
+      "description": "PAYMENT - THANK YOU",
+      "amountMinor": -120000,
+      "card": "5530"
+     },
+     {
+      "date": "2026-09-19",
+      "description": "YOGA STUDIO",
+      "amountMinor": 60000,
+      "card": "5530"
+     },
+     {
+      "date": "2026-09-23",
+      "description": "ONLINE MARKETPLACE",
+      "amountMinor": 48910,
+      "card": "5530"
+     },
+     {
+      "date": "2026-09-28",
+      "description": "SPORTS STORE MALL",
+      "amountMinor": 74800,
+      "card": "5530"
+     }
+    ]
+   },
+   "2026-10": {
+    "rows": [
+     {
+      "date": "2026-10-05",
+      "description": "STREAMING SUBSCRIPTION",
+      "amountMinor": 5600,
+      "card": "5530"
+     },
+     {
+      "date": "2026-10-11",
+      "description": "COFFEE SHOP",
+      "amountMinor": 4200,
+      "card": "5530"
+     },
+     {
+      "date": "2026-10-17",
+      "description": "ONLINE MARKETPLACE",
+      "amountMinor": 31840,
+      "card": "5530"
+     },
+     {
+      "date": "2026-10-18",
+      "description": "PAYMENT - THANK YOU",
+      "amountMinor": -200000,
+      "card": "5530"
+     },
+     {
+      "date": "2026-10-24",
+      "description": "YOGA STUDIO",
+      "amountMinor": 65000,
+      "card": "5530"
+     }
+    ]
+   }
+  }
+ },
+ "cheques": [
+  {
+   "no": "000231",
+   "payee": "Marina Heights Properties LLC",
+   "amountMinor": 2750000,
+   "date": "2026-02-22",
+   "purpose": "Rent Q1"
+  },
+  {
+   "no": "000232",
+   "payee": "Marina Heights Properties LLC",
+   "amountMinor": 2750000,
+   "date": "2026-05-22",
+   "purpose": "Rent Q2"
+  },
+  {
+   "no": "000233",
+   "payee": "Marina Heights Properties LLC",
+   "amountMinor": 2750000,
+   "date": "2026-08-22",
+   "purpose": "Rent Q3"
+  },
+  {
+   "no": "000234",
+   "payee": "Marina Heights Properties LLC",
+   "amountMinor": 2750000,
+   "date": "2026-11-22",
+   "purpose": "Rent Q4"
+  },
+  {
+   "no": "000301",
+   "payee": "Harbour Gate Developments",
+   "amountMinor": 3600000,
+   "date": "2027-01-15",
+   "purpose": "Creekside Residences instalment 3"
+  },
+  {
+   "no": "000302",
+   "payee": "Harbour Gate Developments",
+   "amountMinor": 3600000,
+   "date": "2027-07-15",
+   "purpose": "Creekside Residences instalment 4"
+  },
+  {
+   "no": "000303",
+   "payee": "Harbour Gate Developments",
+   "amountMinor": 3600000,
+   "date": "2028-01-15",
+   "purpose": "Creekside Residences instalment 5"
+  },
+  {
+   "no": "000304",
+   "payee": "Harbour Gate Developments",
+   "amountMinor": 3600000,
+   "date": "2028-07-15",
+   "purpose": "Creekside Residences instalment 6"
+  },
+  {
+   "no": "000305",
+   "payee": "Harbour Gate Developments",
+   "amountMinor": 7200000,
+   "date": "2029-01-15",
+   "purpose": "Creekside Residences handover"
+  }
+ ],
+ "paymentPlan": {
+  "project": "Creekside Residences, unit 1207 (fictional)",
+  "developer": "Harbour Gate Developments",
+  "price": 36000000,
+  "instalments": [
+   {
+    "n": 1,
+    "date": "2026-01-15",
+    "pct": "10",
+    "amountMinor": 3600000,
+    "status": "paid"
+   },
+   {
+    "n": 2,
+    "date": "2026-07-15",
+    "pct": "10",
+    "amountMinor": 3600000,
+    "status": "paid"
+   },
+   {
+    "n": 3,
+    "date": "2027-01-15",
+    "pct": "10",
+    "amountMinor": 3600000,
+    "status": "due"
+   },
+   {
+    "n": 4,
+    "date": "2027-07-15",
+    "pct": "10",
+    "amountMinor": 3600000,
+    "status": "due"
+   },
+   {
+    "n": 5,
+    "date": "2028-01-15",
+    "pct": "10",
+    "amountMinor": 3600000,
+    "status": "due"
+   },
+   {
+    "n": 6,
+    "date": "2028-07-15",
+    "pct": "10",
+    "amountMinor": 3600000,
+    "status": "due"
+   },
+   {
+    "n": 7,
+    "date": "2029-01-15",
+    "pct": "20",
+    "amountMinor": 7200000,
+    "status": "due"
+   },
+   {
+    "n": 8,
+    "date": "2029-06-30",
+    "pct": "20",
+    "amountMinor": 7200000,
+    "status": "on handover, bank finance"
+   }
+  ]
+ },
+ "fx": [
+  {
+   "date": "2026-10-31",
+   "base": "EUR",
+   "quote": "AED",
+   "rate": "4.2500",
+   "source": "Sample rate for the synthetic demo"
+  }
+ ]
+}
