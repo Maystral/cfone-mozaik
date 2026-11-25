@@ -7,7 +7,7 @@ format and currency, and warns before a payment bounces or a card charges intere
 [Mozaik](https://docs.jigjoy.ai). First built at the JigJoy Black Friday AI Hackathon, track
 *Agents in Finance*.
 
-![CFOne after an offline close: position, swarm lanes, radar, sourced actions](docs/img/desktop.png)
+![CFOne after a check: where you stand, what needs attention, the next 90 days, and how the numbers were checked](docs/img/desktop.png)
 
 > The demo uses synthetic data only: fictional people, Bank A, Bank B and Bank C, and
 > fictional merchants. Not financial advice.

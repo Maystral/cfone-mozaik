@@ -26,6 +26,8 @@ export class HouseholdState extends RuntimeState {
 	spans: Span[] = []
 	metrics: Metrics = emptyMetrics()
 	log: string[] = []
+	/** notes the Clerk flagged (e.g. an instalment paid by bank finance) */
+	flags: { reason: string; sources: string }[] = []
 	/** async work in code participants (file reading, debounces); the close settles only at zero */
 	pendingWork = 0
 	finishMetrics?: () => void

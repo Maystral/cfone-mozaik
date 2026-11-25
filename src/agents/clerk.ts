@@ -98,7 +98,9 @@ export function createClerk(ctx: Ctx): Agent {
 		const doc = docOf(a.docId)
 		const sources = (a.sources ?? []).map((s) => { onLine(doc, s, ""); return refOf(doc.id, s) })
 		if (sources.length === 0) throw new Error("a flag needs at least one source line")
-		emit(ctx.rt, "commitment.flagged", self.getId(), { reason: a.reason, sources: sources.map((s) => ("docId" in s ? `${s.docId}:p${s.page}:l${s.line}` : s.factId)).join(",") })
+		const refs = sources.map((s) => ("docId" in s ? `${s.docId}:p${s.page}:l${s.line}` : s.factId)).join(",")
+		state.flags.push({ reason: a.reason, sources: refs })
+		emit(ctx.rt, "commitment.flagged", self.getId(), { reason: a.reason, sources: refs })
 		return { ok: true }
 	})
 	const finish = tool<{ docId?: string }>("finish_document", "Mark the document done.", { type: "object", properties: { docId: { type: "string" } }, required: ["docId"] }, async (a) => {
