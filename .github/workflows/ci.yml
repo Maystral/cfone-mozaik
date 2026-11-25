@@ -6,6 +6,10 @@ on:
     branches-ignore: [ main ]
   workflow_dispatch:
 
+# GitHub-hosted only. Pull requests (including forks) never touch the self-hosted Pi.
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest

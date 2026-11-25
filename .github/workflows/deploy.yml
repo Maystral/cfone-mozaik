@@ -1,9 +1,14 @@
 name: Deploy
 
+# Runs on the self-hosted Raspberry Pi. Only ever from main of this repository:
+# never on pull requests (forks cannot reach the Pi), never from another branch or a fork.
 on:
   push:
     branches: [ main ]
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 concurrency:
   group: deploy-cfone-mozaik
@@ -16,11 +21,16 @@ env:
 
 jobs:
   deploy:
+    if: github.repository == 'Maystral/cfone-mozaik' && github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     runs-on: self-hosted
+    # Set its deployment branches to "main" only in Settings → Environments → production.
+    environment: production
     timeout-minutes: 30
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       # Type-check and tests run inside the build; a failure stops here and the running app stays up.
       - name: Build Docker image
