@@ -38,6 +38,7 @@ export function createForecaster(ctx: Ctx): Agent {
 	let timer: NodeJS.Timeout | undefined
 	let version = 0
 	let lastSignature = ""
+	let announcedReady = false
 
 	const publish = () => {
 		const base = forecastBase(ctx)
@@ -121,7 +122,9 @@ export function createForecaster(ctx: Ctx): Agent {
 			state.facts.put({ id: `cover:${c.riskId}:${c.accountId}`, label: `${name} can cover the rest of ${c.riskId} at the sourced rate`, kind: "money", value: c.needMinor, currency: c.currency, sources: [{ factId: `shortfall:${c.riskId}` }, { factId: c.rateFactId }], derivedFrom: [`shortfall:${c.riskId}`, c.rateFactId], producer })
 			state.facts.put({ id: `free:${c.riskId}:${c.accountId}`, label: `${name} free after its buffer`, kind: "money", value: c.freeMinor, currency: c.currency, sources: [f.openings[c.accountId]!.source], producer })
 		}
+		for (const r of f.risks) state.risksSeen.set(r.id, r)
 		const ready = intakeDone(state)
+		if (ready) announcedReady = true
 		const signature = `${ready}|${f.fingerprint}|${JSON.stringify(f.flows)}|${JSON.stringify(f.cover)}`
 		if (signature === lastSignature && state.forecast) return
 		lastSignature = signature
@@ -141,9 +144,7 @@ export function createForecaster(ctx: Ctx): Agent {
 
 	const handlers = TRIGGERS.map((t) => ({ specification: new On(t), processor: { apply: () => trigger() } }))
 	// Until intake is complete, a finished loop (e.g. the Clerk's last document) may be what completes it.
-	handlers.push({ specification: new On("model.answer"), processor: { apply: () => { if (!ready()) trigger() } } })
-	let wasReady = false
-	const ready = () => { if (!wasReady) wasReady = intakeDone(state); return wasReady }
+	handlers.push({ specification: new On("model.answer"), processor: { apply: () => { if (!announcedReady) trigger() } } })
 	const self: Agent = codeParticipant("Forecaster", handlers)
 	return self
 }

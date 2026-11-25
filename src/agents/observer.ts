@@ -26,7 +26,7 @@ export function createObserver(ctx: Ctx, sink?: (e: SemanticEvent) => void): Hum
 	const { state } = ctx
 	const t0 = Date.now()
 	const open = new Set<string>()
-	let started = false, settled = false
+	let started = false, settled = false, completed = false
 	let lastVersion = -1, lastChange = Date.now()
 	let timer: NodeJS.Timeout | undefined
 	const record = process.env.CFONE_RECORD === "1"
@@ -54,6 +54,13 @@ export function createObserver(ctx: Ctx, sink?: (e: SemanticEvent) => void): Hum
 		for (const [t, d] of pts) { if (cur >= 2) overlap += t - prev; cur += d; prev = t }
 		m.overlapMs = overlap
 		m.loops = state.spans.length
+	}
+
+	const complete = () => {
+		if (completed) return
+		completed = true
+		finish()
+		emit(ctx.rt, "close.completed", self.getId(), { metrics: { ...state.metrics } })
 	}
 
 	const self: Human = createHuman({
@@ -85,6 +92,8 @@ export function createObserver(ctx: Ctx, sink?: (e: SemanticEvent) => void): Hum
 								if (p.loopId) open.delete(p.loopId)
 								const s = state.spans.find((x) => x.loopId === p.loopId)
 								if (s && s.end === undefined) s.end = Date.now() - t0
+								// If the brief could not be written (provider failure), the close still completes.
+								if (settled && !completed && open.size === 0 && !state.brief) setTimeout(() => complete(), 0)
 								break
 							}
 							case "statement.rejected": state.metrics.rejections++; break
@@ -93,8 +102,7 @@ export function createObserver(ctx: Ctx, sink?: (e: SemanticEvent) => void): Hum
 							case "guard.blocked": state.metrics.blocked++; break
 							case "agent.failed": state.metrics.failures++; break
 							case "brief.published":
-								finish()
-								emit(ctx.rt, "close.completed", self.getId(), { metrics: { ...state.metrics } })
+								complete()
 								break
 						}
 					} catch (e) {

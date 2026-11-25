@@ -28,7 +28,11 @@ export function riskViews(ctx: Ctx, owner: string, kind: SentinelKind): RiskView
 	const f = state.forecast
 	if (!f) return []
 	const out: RiskView[] = []
-	for (const r of f.risks.filter((x) => TYPES[kind].includes(x.type))) {
+	// Current risks, plus risks this sentinel's own claims already resolved (they still need their action).
+	const current = new Set(f.risks.map((r) => r.id))
+	const resolved = [...new Set([...state.claims.values()].filter((c) => c.owner === owner && !current.has(c.riskId)).map((c) => c.riskId))]
+		.flatMap((id) => { const r = state.risksSeen.get(id); return r ? [r] : [] })
+	for (const r of [...f.risks, ...resolved].filter((x) => TYPES[kind].includes(x.type)).sort((a, b) => a.date.localeCompare(b.date) || a.id.localeCompare(b.id))) {
 		const claims = [...state.claims.values()].filter((c) => c.owner === owner && c.riskId === r.id).sort((a, b) => a.byDate.localeCompare(b.byDate))
 		const action = [...state.actions.values()].filter((a) => a.riskId === r.id && a.status !== "superseded").at(-1) ?? null
 		const cover = state.facts.list(`cover:${r.id}:`).map((x) => ({ factId: x.id, accountId: x.id.split(":")[2]!, rateFactId: x.derivedFrom?.find((d) => d.startsWith("fx:")) }))
