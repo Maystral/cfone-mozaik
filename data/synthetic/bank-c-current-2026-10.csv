@@ -1,0 +1,6 @@
+account,currency,holder,period_from,period_to,opening_balance,closing_balance
+Bank C current 7710,EUR,LUKA,2026-10-01,2026-10-31,4311.74,4250.00
+date,description,amount,balance
+2026-10-03,INSURANCE PREMIUM,-45.00,4266.74
+2026-10-15,INTEREST,3.25,4269.99
+2026-10-20,PHONE PLAN HOME,-19.99,4250.00
