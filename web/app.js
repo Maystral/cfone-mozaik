@@ -9,6 +9,7 @@ const docCache = new Map()
 async function refresh() {
 	refreshTimer = null
 	const r = await fetch("/api/state")
+	if (r.status === 401) { location.href = "/login"; return }
 	state = await r.json()
 	render()
 }
@@ -139,5 +140,7 @@ $("run").onclick = async () => {
 	if (r.status === 202) { window.__t0 = performance.now(); listen(); soon(50) }
 }
 
-refresh().then(() => { if (state.running) listen() })
+fetch("/api/auth/me").then((r) => r.ok ? r.json() : null).then((me) => { if (me) $("who").textContent = me.username })
+$("logout").onclick = async () => { await fetch("/api/auth/logout", { method: "POST" }); location.href = "/login" }
+refresh().then(() => { if (state?.running) listen() })
 setInterval(() => { if (state?.running) soon(0) }, 700)

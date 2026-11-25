@@ -12,12 +12,34 @@ import { emit } from "./events.ts"
 import { formatFact } from "./facts.ts"
 import { installCrashGuard, quietCloudWarning } from "./logging.ts"
 import { renderAction } from "./facts.ts"
+import { cookieValue, RateLimit, Sessions, UserStore } from "./auth.ts"
 
 const WEB = resolve(fileURLToPath(new URL("../web/", import.meta.url)))
-const STATIC: Record<string, [string, string]> = { "/": ["index.html", "text/html; charset=utf-8"], "/app.js": ["app.js", "text/javascript; charset=utf-8"], "/style.css": ["style.css", "text/css; charset=utf-8"] }
+const STATIC: Record<string, [string, string]> = { "/": ["index.html", "text/html; charset=utf-8"], "/app.js": ["app.js", "text/javascript; charset=utf-8"] }
+const PUBLIC: Record<string, [string, string]> = { "/login": ["login.html", "text/html; charset=utf-8"], "/login.js": ["login.js", "text/javascript; charset=utf-8"], "/style.css": ["style.css", "text/css; charset=utf-8"] }
+const COOKIE = "cfone_session"
+
+export interface ServerOptions {
+	/** where accounts are kept (users.json); default CFONE_STATE_DIR or .data */
+	stateDir?: string
+	/** run one close at start so the page has numbers on first login */
+	prewarm?: boolean
+}
+
+async function readJson(req: IncomingMessage): Promise<Record<string, unknown>> {
+	let raw = ""
+	for await (const chunk of req) { raw += chunk; if (raw.length > 10_000) throw new Error("body too large") }
+	try { return raw ? JSON.parse(raw) : {} } catch { return {} }
+}
 const QUIET = new Set(["inference.stream", "message_received.completed", "inference.completed", "interception.started", "interception.finished"])
 
-export function createServer(config: Config): Server {
+export function createServer(config: Config, opts: ServerOptions = {}): Server {
+	const users = new UserStore(resolve(opts.stateDir ?? process.env.CFONE_STATE_DIR ?? ".data", "users.json"))
+	users.ensure("demo", "demo")
+	const sessions = new Sessions()
+	const limiter = new RateLimit(20, 60_000)
+	const setSession = (res: ServerResponse, token: string) =>
+		res.setHeader("set-cookie", `${COOKIE}=${token}; HttpOnly; SameSite=Lax; Path=/; Max-Age=${Math.floor(sessions.ttlMs / 1000)}`)
 	let run: RunningClose | undefined
 	let running = false
 	let runSeq = 0
@@ -56,10 +78,56 @@ export function createServer(config: Config): Server {
 		}
 	}
 
+	const begin = (): string | undefined => {
+		if (running) return undefined
+		running = true
+		buffer = []
+		const runId = `run-${++runSeq}`
+		run = startClose({ config, onEvent: send })
+		run.done.then(() => { running = false }, () => { running = false })
+		return runId
+	}
+	if (opts.prewarm) begin()
+
 	return httpServer(async (req: IncomingMessage, res: ServerResponse) => {
 		try {
 			const url = new URL(req.url ?? "/", "http://x")
 			const path = url.pathname
+			if (req.method === "GET" && path === "/healthz") return json(res, 200, { ok: true, mode: config.mode, running })
+			if (req.method === "GET" && PUBLIC[path]) {
+				const [file, type] = PUBLIC[path]!
+				res.writeHead(200, { "content-type": type, "cache-control": "no-store" })
+				res.end(await readFile(resolve(WEB, file)))
+				return
+			}
+			if (req.method === "POST" && (path === "/api/auth/login" || path === "/api/auth/register")) {
+				if (!limiter.allow(req.socket.remoteAddress ?? "?")) return json(res, 429, { error: "Too many attempts. Wait a minute." })
+				const body = await readJson(req)
+				const username = String(body.username ?? "").trim().toLowerCase(), password = String(body.password ?? "")
+				if (path === "/api/auth/register") {
+					const r = users.register(username, password)
+					if (!r.ok) return json(res, r.error.includes("taken") ? 409 : 400, { error: r.error })
+					setSession(res, sessions.create(username))
+					return json(res, 201, { username })
+				}
+				if (!users.verify(username, password)) return json(res, 401, { error: "Wrong username or password." })
+				setSession(res, sessions.create(username))
+				return json(res, 200, { username })
+			}
+			const token = cookieValue(req.headers.cookie, COOKIE)
+			const user = sessions.user(token)
+			if (!user) {
+				if (path.startsWith("/api/")) return json(res, 401, { error: "Log in first." })
+				res.writeHead(302, { location: "/login" })
+				res.end()
+				return
+			}
+			if (req.method === "POST" && path === "/api/auth/logout") {
+				sessions.end(token)
+				res.setHeader("set-cookie", `${COOKIE}=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0`)
+				return json(res, 200, { ok: true })
+			}
+			if (req.method === "GET" && path === "/api/auth/me") return json(res, 200, { username: user })
 			if (req.method === "GET" && STATIC[path]) {
 				const [file, type] = STATIC[path]!
 				res.writeHead(200, { "content-type": type, "cache-control": "no-store" })
@@ -67,13 +135,8 @@ export function createServer(config: Config): Server {
 				return
 			}
 			if (req.method === "POST" && path === "/api/close") {
-				if (running) return json(res, 409, { error: "a close is already running" })
-				running = true
-				buffer = []
-				const runId = `run-${++runSeq}`
-				run = startClose({ config, onEvent: send })
-				run.done.then(() => { running = false }, () => { running = false })
-				return json(res, 202, { runId })
+				const runId = begin()
+				return runId ? json(res, 202, { runId }) : json(res, 409, { error: "a close is already running" })
 			}
 			if (req.method === "GET" && path === "/api/events") {
 				res.writeHead(200, { "content-type": "text/event-stream", "cache-control": "no-store", connection: "keep-alive" })
@@ -108,6 +171,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
 	quietCloudWarning()
 	installCrashGuard((e) => console.error("! caught:", e instanceof Error ? e.message : e))
 	const config = loadConfig()
-	createServer(config).listen(config.port, () => console.log(`CFOne on http://localhost:${config.port} (${config.mode === "offline" ? "offline: scripted model" : `live: ${config.model}`})`))
+	createServer(config, { prewarm: process.env.CFONE_PREWARM !== "0" }).listen(config.port, () =>
+		console.log(`CFOne on http://localhost:${config.port} (${config.mode === "offline" ? "offline: scripted model" : `live: ${config.model}`}) · log in as demo / demo`))
 }
 

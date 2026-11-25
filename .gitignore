@@ -3,3 +3,4 @@ out/
 .superpowers/
 .env
 *.log
+.data/

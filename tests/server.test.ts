@@ -3,14 +3,36 @@ import assert from "node:assert/strict"
 import type { AddressInfo } from "node:net"
 import { createServer } from "../src/server.ts"
 import { loadConfig } from "../src/config.ts"
+import { mkdtempSync } from "node:fs"
+import { tmpdir } from "node:os"
+import { join } from "node:path"
 
 test("the page runs a close over SSE, shows cited lines and takes approvals", async () => {
-	const server = createServer(loadConfig({ CFONE_OFFLINE: "1", CFONE_OFFLINE_LATENCY_MS: "20" }))
+	const server = createServer(loadConfig({ CFONE_OFFLINE: "1", CFONE_OFFLINE_LATENCY_MS: "20" }), { stateDir: mkdtempSync(join(tmpdir(), "cfone-state-")) })
 	await new Promise<void>((r) => server.listen(0, r))
 	const base = `http://127.0.0.1:${(server.address() as AddressInfo).port}`
-	const get = (p: string) => fetch(base + p)
-	const post = (p: string) => fetch(base + p, { method: "POST" })
+	let cookie = ""
+	const get = (p: string) => fetch(base + p, { headers: { cookie }, redirect: "manual" })
+	const post = (p: string, body?: object) => fetch(base + p, { method: "POST", headers: { cookie, "content-type": "application/json" }, body: body ? JSON.stringify(body) : undefined, redirect: "manual" })
 	try {
+		assert.equal((await get("/healthz")).status, 200)
+		const anon = await get("/")
+		assert.equal(anon.status, 302)
+		assert.equal(anon.headers.get("location"), "/login")
+		assert.equal((await get("/api/state")).status, 401)
+		assert.equal((await post("/api/close")).status, 401)
+		const loginPage = await get("/login")
+		assert.equal(loginPage.status, 200)
+		assert.match(await loginPage.text(), /demo/)
+		assert.equal((await post("/api/auth/login", { username: "demo", password: "nope" })).status, 401)
+		const reg = await post("/api/auth/register", { username: "mila", password: "secret1" })
+		assert.equal(reg.status, 201)
+		assert.match(reg.headers.get("set-cookie") ?? "", /cfone_session=.+HttpOnly/)
+		assert.equal((await post("/api/auth/register", { username: "mila", password: "secret1" })).status, 409)
+		const login = await post("/api/auth/login", { username: "demo", password: "demo" })
+		assert.equal(login.status, 200)
+		cookie = (login.headers.get("set-cookie") ?? "").split(";")[0]!
+		assert.deepEqual(await (await get("/api/auth/me")).json(), { username: "demo" })
 		const home = await get("/")
 		assert.equal(home.status, 200)
 		assert.match(await home.text(), /Not financial advice/)
@@ -58,6 +80,8 @@ test("the page runs a close over SSE, shows cited lines and takes approvals", as
 		assert.equal(after.actions.find((a: { id: string }) => a.id === id).status, "approved")
 		assert.equal((await post("/api/close")).status, 202, "a new close after the first finished")
 		await new Promise((r) => setTimeout(r, 50))
+		assert.equal((await post("/api/auth/logout")).status, 200)
+		assert.equal((await get("/api/state")).status, 401)
 	} finally {
 		server.closeAllConnections()
 		await new Promise((r) => server.close(r))
