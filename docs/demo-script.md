@@ -14,7 +14,7 @@ backup recording on the desktop, offline mode one keystroke away (`CFONE_OFFLINE
 | 1:55 | "No model can type a number here. Every amount is a fact computed by code, with a source. When a draft had a raw number, the guard blocked it." | Click a chip: the source line; show the blocked counter |
 | 2:15 | "And the heads-up: the 15 January property cheque is 8,720.53 short at the current pace, but the euro account in Bank C covers it with 2,051.89 euros at the rate in the file. Ten weeks to act, not ten minutes." | Third action |
 | 2:30 | "I approve the plan. The forecast redraws. Nothing moves money; I do." | Approve; radar updates |
-| 2:40 | "Twenty-two participants, no orchestrator, peak of N loops at once, two rejections caught, one conflict settled, zero invented numbers. It runs without an API key from the README." | Metrics line |
+| 2:40 | "Twenty-two participants, no orchestrator, peak of 23 loops at once in the offline run, two rejections caught, two conflicts settled, zero invented numbers. It runs without an API key from the README." | Metrics line |
 | 2:55 | "CFOne: see everything you have, owe and have promised, and fix problems before they happen." | Closing slide |
 
 **If the live model fails:** switch to offline mode and say so: "same agents and checks,

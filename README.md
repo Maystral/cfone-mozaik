@@ -7,7 +7,7 @@ format and currency, and warns before a payment bounces or a card charges intere
 [Mozaik](https://docs.jigjoy.ai). First built at the JigJoy Black Friday AI Hackathon, track
 *Agents in Finance*.
 
-<!-- Task 16: add docs/img/cfone-desktop.png here -->
+![CFOne after an offline close: position, swarm lanes, radar, sourced actions](docs/img/desktop.png)
 
 > The demo uses synthetic data only: fictional people, Bank A, Bank B and Bank C, and
 > fictional merchants. Not financial advice.
@@ -50,6 +50,7 @@ OPENAI_API_KEY=sk-... npm run demo    # live with OpenAI (gpt-5.5)
 CFONE_OPENAI_BASE_URL=http://localhost:11434/v1 CFONE_MODEL=<model> npm run demo   # any OpenAI-compatible server
 npm start                             # the page on http://localhost:3000
 npm test
+npm run typecheck
 ```
 
 Or copy `.env.example` to `.env`. The synthetic documents are committed under
@@ -68,7 +69,16 @@ Or copy `.env.example` to `.env`. The synthetic documents are committed under
   read; both sentinels then plan at the same time and compete for the same cash.
 - **Measured, not claimed.** Every run prints the lane chart and
   `peak concurrent loops · LLM loops · rejections caught · conflicts settled · drafts blocked`.
-  <!-- Task 18: paste the metrics line from docs/runs/2026-11-27-live.md -->
+  An offline run on the demo data ([full log](docs/runs/2026-11-25-offline.md)):
+
+  ```
+  participants: 22 · peak concurrent loops: 23 · LLM loops: 29 · rejections caught: 2 · conflicts settled: 2 · drafts blocked: 0 · facts: 94
+  ```
+
+  Peak concurrent loops counts loops open at once (ten readers, the clerk's three documents and
+  the categoriser's ten statements overlap); the `SafeRunner` caps inferences actually in flight
+  at six (`CFONE_MAX_IN_FLIGHT`) to respect provider rate limits. Try `CFONE_CHAOS=1 npm run demo`
+  to watch the Number Guard block drafts that type a number.
 
 ## The checks between agents
 
@@ -129,11 +139,19 @@ docs/           design, plan, data spec, Mozaik notes, demo script
 tests/          node:test suites
 ```
 
+## Screens
+
+| Source drawer | Phone width |
+|---|---|
+| ![A chip opens the facts and lines behind an amount](docs/img/drawer.png) | ![The page at 390 px](docs/img/mobile.png) |
+
 ## Limits and next
 
 - The demo reads five synthetic layouts across three banks; the readers have no bank-specific
   code. Scanned statements need OCR first.
 - Moving money between currencies is suggested, not reserved.
+- The live-model prompts are written but this build has only been run end to end with the
+  offline scripted model; a recorded live run is still to come.
 - Next: scans and more formats, cross-currency planning with sourced rates, a second rule-based
   reader on every statement, and "Ask CFOne" questions answered by parallel analysts behind the
   same Number Guard.
