@@ -42,7 +42,7 @@ export function signedRow(ex: ExtractionArgs, i: number): Minor {
 }
 
 /** Balance values printed with a sign: "-2,736.75" is a negative balance on a current account. */
-function signedBalance(text: string): Minor {
+export function signedBalanceText(text: string): Minor {
 	const p = parsePrinted(text)
 	return /^\s*(?:[A-Z]{3}\s+)?-/.test(text) ? -p.minor : p.minor
 }
@@ -50,7 +50,7 @@ function signedBalance(text: string): Minor {
 function control(ex: ExtractionArgs, name: ControlName): Minor | undefined {
 	const c = ex.controls[name]
 	if (!c) return undefined
-	return signedBalance(c.text)
+	return signedBalanceText(c.text)
 }
 
 export function reconcile(ex: ExtractionArgs): { ok: boolean; diffMinor: Minor; firstBadRow?: number; failures: string[] } {
@@ -78,7 +78,7 @@ export function reconcile(ex: ExtractionArgs): { ok: boolean; diffMinor: Minor; 
 			if (newestFirst) order.reverse()
 			let prev = opening
 			for (const i of order) {
-				const bal = signedBalance(ex.rows[i]!.balance!.text)
+				const bal = signedBalanceText(ex.rows[i]!.balance!.text)
 				if (prev + signed[i]! !== bal) { firstBadRow = i; failures.push(`running balance breaks at row ${i + 1} (${ex.rows[i]!.amount.source})`); break }
 				prev = bal
 			}
