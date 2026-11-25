@@ -1,6 +1,7 @@
 import { defineRuntime, RuntimeState } from "@mozaik-ai/core"
 import type { Config } from "./config.ts"
 import { FactStore } from "./facts.ts"
+import type { Forecast } from "./domain/forecast.ts"
 import { emptyMetrics, type Account, type Action, type CardTerms, type Claim, type Commitment, type Doc, type ExtractionArgs, type Grant, type Metrics, type Span, type Statement } from "./types.ts"
 
 export class HouseholdState extends RuntimeState {
@@ -16,11 +17,16 @@ export class HouseholdState extends RuntimeState {
 	grants = new Map<string, Grant>()
 	actions = new Map<string, Action>()
 	facts = new FactStore()
-	forecast?: unknown
+	forecast?: Forecast
+	/** context id -> agent id, so inference failures can be traced to an agent */
+	loopOwners = new Map<string, string>()
 	brief?: { markdown: string }
 	spans: Span[] = []
 	metrics: Metrics = emptyMetrics()
 	log: string[] = []
+	/** async work in code participants (file reading, debounces); the close settles only at zero */
+	pendingWork = 0
+	finishMetrics?: () => void
 	constructor(readonly config: Config) {
 		super()
 	}
