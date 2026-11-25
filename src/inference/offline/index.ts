@@ -2,3 +2,4 @@
 import "./reader.ts"
 import "./clerk.ts"
 import "./sentinels.ts"
+import "./categoriser.ts"
