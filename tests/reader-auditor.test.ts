@@ -1,6 +1,6 @@
 import { test } from "node:test"
 import assert from "node:assert/strict"
-import { SemanticEvent, type InferenceInput, type InferenceRunner, UserMessageItem } from "@mozaik-ai/core"
+import { ModelMessageItem, SemanticEvent, type InferenceInput, type InferenceRunner, UserMessageItem } from "@mozaik-ai/core"
 import { startHarness } from "./helpers/harness.ts"
 import { createObserver } from "../src/agents/observer.ts"
 import { createCoordinator } from "../src/agents/coordinator.ts"
@@ -73,4 +73,24 @@ test("reader failure quarantines the document", async () => {
 	assert.equal(h.events.filter((e) => e.type === "statement.verified").length, 9)
 	assert.equal(h.events.filter((e) => e.type === "agent.failed").length, 1)
 	assert.equal(h.ctx.state.statements.has("bank-a-card-8821:2026-10"), false)
+})
+
+class SilentFor implements InferenceRunner {
+	private readonly inner = new OfflineRunner({ latencyMs: 20, chaos: false })
+	constructor(private readonly docId: string) {}
+	async run(input: InferenceInput) {
+		const task = input.context.getItems().find((i) => i instanceof UserMessageItem) as UserMessageItem | undefined
+		if (task?.content.text.includes(`docId=${this.docId}\n`)) return { items: [ModelMessageItem.rehydrate({ text: "I could not read this." })], tokenUsage: undefined, rowResponse: {} }
+		return this.inner.run(input)
+	}
+	async *stream(input: InferenceInput) { yield SemanticEvent.create("inference.output", input.model, await this.run(input)) }
+}
+
+test("a reader that never submits does not hang the close", async () => {
+	const h = close(new SilentFor("bank-a-current-2026-09"))
+	await h.waitFor("close.settled", 1, 15000)
+	const doc = h.ctx.state.documents.get("bank-a-current-2026-09")!
+	assert.equal(doc.status, "quarantined")
+	assert.match(doc.reason ?? "", /did not submit/)
+	assert.equal(h.events.filter((e) => e.type === "statement.verified").length, 9)
 })

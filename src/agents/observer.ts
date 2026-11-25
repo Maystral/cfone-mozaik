@@ -27,7 +27,7 @@ export function createObserver(ctx: Ctx, sink?: (e: SemanticEvent) => void): Hum
 	const t0 = Date.now()
 	const open = new Set<string>()
 	let started = false, settled = false, completed = false
-	let lastVersion = -1, lastChange = Date.now()
+	let lastVersion = -1, lastChange = Date.now(), lastActivity = Date.now()
 	let timer: NodeJS.Timeout | undefined
 	const record = process.env.CFONE_RECORD === "1"
 	if (record) { mkdirSync("out", { recursive: true }); appendFileSync("out/events.jsonl", "") }
@@ -38,6 +38,22 @@ export function createObserver(ctx: Ctx, sink?: (e: SemanticEvent) => void): Hum
 		if (settled) return
 		const v = state.forecast?.version ?? 0
 		if (v !== lastVersion) { lastVersion = v; lastChange = Date.now(); return }
+		// Watchdog: everything is idle but a document never finished (a model ended its loop without its tool call).
+		if (open.size === 0 && state.pendingWork === 0 && !terminal() && Date.now() - lastActivity >= SETTLE_QUIET_MS) {
+			lastActivity = Date.now()
+			for (const d of state.documents.values()) {
+				if (d.kind === "statement" && d.status !== "verified" && d.status !== "quarantined") {
+					d.status = "quarantined"
+					d.reason = "reader did not submit an extraction"
+					emit(ctx.rt, "statement.quarantined", self.getId(), { docId: d.id, reason: d.reason })
+				} else if (d.kind !== "statement" && d.status === "received") {
+					d.status = "processed"
+					d.reason = "clerk did not finish; partial"
+					state.log.push(`observer: ${d.id} ${d.reason}`)
+				}
+			}
+			return
+		}
 		if (open.size === 0 && terminal() && Date.now() - lastChange >= SETTLE_QUIET_MS && state.pendingWork === 0) {
 			settled = true
 			if (timer) clearInterval(timer)
@@ -74,6 +90,7 @@ export function createObserver(ctx: Ctx, sink?: (e: SemanticEvent) => void): Hum
 						sink?.(event)
 						if (record) appendFileSync("out/events.jsonl", JSON.stringify(summarize(event)) + "\n")
 						const p = (event.payload ?? {}) as { loopId?: string }
+						lastActivity = Date.now()
 						switch (event.type) {
 							case "close.requested":
 								if (!started) { started = true; timer = setInterval(check, 50); timer.unref() }
